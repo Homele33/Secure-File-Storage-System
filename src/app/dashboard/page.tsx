@@ -1,0 +1,147 @@
+"use client";
+import { useEffect, useState } from "react";
+import Layout from "@/components/Layout";
+
+type StoredFile = {
+  _id: string;
+  originalName: string;
+  createdAt: string;
+};
+
+export default function Home() {
+  const [files, setFiles] = useState<StoredFile[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  useEffect(() => {
+    if (token) fetchFiles();
+  }, [token]);
+
+  async function fetchFiles() {
+    const res = await fetch("/api/file/list", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setFiles(data.files);
+    }
+  }
+
+  async function uploadFile(e: React.FormEvent) {
+    e.preventDefault();
+    if (!file) return;
+    const form = new FormData();
+    form.append("file", file);
+
+    const res = await fetch("/api/file/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    });
+
+    if (res.ok) {
+      setFile(null);
+      fetchFiles();
+    } else {
+      alert("Upload failed");
+    }
+  }
+
+  async function deleteFile(id: string) {
+    if (!confirm("Delete this file?")) return;
+    const res = await fetch(`/api/file/delete?id=${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) fetchFiles();
+    else alert("Failed to delete");
+  }
+
+  return (
+    <Layout>
+      <h1 className="text-3xl font-mono font-bold text-black text-center mb-8">
+        Secure File Storage 🖥️💾
+      </h1>
+
+      {/* Upload Section */}
+      <section className="bg-white border border-gray-300 p-6 rounded-lg mb-8">
+        <h2 className="text-2xl font-mono font-semibold text-black mb-4">
+          🔼 Upload New File
+        </h2>
+        <form
+          onSubmit={uploadFile}
+          className="flex flex-col sm:flex-row items-center gap-4"
+        >
+          <input
+            type="file"
+            id="fileInput"
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+          />
+          <label
+            htmlFor="fileInput"
+            className="cursor-pointer px-4 py-2 border border-gray-400 rounded-md font-mono text-black hover:bg-gray-100 transition"
+          >
+            Select File
+          </label>
+          <span className="font-mono text-black flex-1">
+            {file?.name || "No file selected"}
+          </span>
+          <button
+            type="submit"
+            disabled={!file}
+            className="px-4 py-2 bg-gray-800 text-white rounded-md font-mono hover:bg-gray-900 disabled:opacity-50 transition"
+          >
+            Upload
+          </button>
+        </form>
+      </section>
+
+      {/* Files List Section */}
+      <section className="bg-white border border-gray-300 p-6 rounded-lg">
+        <h2 className="text-2xl font-mono font-semibold text-black mb-4">
+          📂 My Files
+        </h2>
+
+        {files.length > 0 ? (
+          <ul className="divide-y divide-gray-200">
+            {files.map((f) => (
+              <li
+                key={f._id}
+                className="py-4 flex justify-between items-center"
+              >
+                <div>
+                  <p className="font-mono text-black">{`> ${f.originalName}`}</p>
+                  <p className="text-sm font-mono text-black opacity-70">
+                    {new Date(f.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <div className="flex space-x-4">
+                  <a
+                    href={`/api/file/download?id=${f._id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-black hover:underline"
+                  >
+                    [download]
+                  </a>
+                  <button
+                    onClick={() => deleteFile(f._id)}
+                    className="font-mono text-red-600 hover:underline"
+                  >
+                    [delete]
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="font-mono text-black opacity-70">
+            // No files uploaded yet...
+          </p>
+        )}
+      </section>
+    </Layout>
+  );
+}
