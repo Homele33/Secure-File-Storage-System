@@ -55,13 +55,18 @@ export default function Login() {
         </button>
       </form>
 
-      <div className="text-center mt-6">
-        <p className="text-gray-600">Don’t have an account?</p>
+      <div className="mt-6 flex justify-between">
+        <button
+          onClick={() => router.push("/")}
+          className="text-gray-600 hover:underline font-medium"
+        >
+          ← Back to Home
+        </button>
         <button
           onClick={() => router.push("/register")}
-          className="mt-2 text-blue-500 hover:underline font-medium"
+          className="text-blue-500 hover:underline font-medium"
         >
-          Create one
+          Create an account →
         </button>
       </div>
     </Layout>
