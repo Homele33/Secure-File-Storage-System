@@ -1,15 +1,16 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext"; // ← import
 import Layout from "@/components/Layout";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useAuth(); // ← grab login()
   const router = useRouter();
 
   async function handleLogin(e: React.FormEvent) {
-    console.log(email, password);
     e.preventDefault();
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -18,8 +19,7 @@ export default function Login() {
     });
     const data = await res.json();
     if (res.ok) {
-      localStorage.setItem("token", data.token);
-      router.push("/dashboard");
+      login(data.token); // ← use context
     } else {
       alert("Login failed");
     }

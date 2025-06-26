@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 type StoredFile = {
   _id: string;
   originalName: string;
@@ -11,12 +12,25 @@ type StoredFile = {
 export default function Home() {
   const [files, setFiles] = useState<StoredFile[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const { isAuthenticated, logout } = useAuth();
+  const router = useRouter();
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   useEffect(() => {
     if (token) fetchFiles();
   }, [token]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, router]);
+
+  // while checking auth, you can show nothing or a spinner
+  if (!isAuthenticated) {
+    return null;
+  }
 
   async function fetchFiles() {
     const res = await fetch("/api/file/list", {
@@ -48,6 +62,26 @@ export default function Home() {
     }
   }
 
+  async function downloadFile(id: string, originalName: string) {
+    const res = await fetch(`/api/file/download?id=${id}`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      alert("Failed to download");
+      return;
+    }
+    const blob = await res.blob();
+    // Create a temporary link and click it to trigger browser download
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = originalName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
   async function deleteFile(id: string) {
     if (!confirm("Delete this file?")) return;
     const res = await fetch(`/api/file/delete?id=${id}`, {
@@ -63,6 +97,12 @@ export default function Home() {
       <h1 className="text-3xl font-mono font-bold text-black text-center mb-8">
         Secure File Storage 🖥️💾
       </h1>
+      <button
+        onClick={logout}
+        className="absolute top-4 right-4 text-sm text-red-600"
+      >
+        Logout
+      </button>
 
       {/* Upload Section */}
       <section className="bg-white border border-gray-300 p-6 rounded-lg mb-8">
@@ -118,14 +158,12 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="flex space-x-4">
-                  <a
-                    href={`/api/file/download?id=${f._id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => downloadFile(f._id, f.originalName)}
                     className="font-mono text-black hover:underline"
                   >
                     [download]
-                  </a>
+                  </button>
                   <button
                     onClick={() => deleteFile(f._id)}
                     className="font-mono text-red-600 hover:underline"

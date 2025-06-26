@@ -1,13 +1,17 @@
 import crypto from "crypto";
 
 const algorithm = "aes-256-cbc";
-const key = Buffer.from(process.env.ENCRYPTION_KEY!, "utf8"); // must be 32 bytes
+const key = Buffer.from(process.env.ENCRYPTION_KEY!, "hex"); // 32 bytes
+
+if (key.length !== 32) {
+  throw new Error(`ENCRYPTION_KEY must be 32 bytes (got ${key.length})`);
+}
 
 export function encryptBuffer(buffer: Buffer): {
   encrypted: Buffer;
   iv: string;
 } {
-  const iv = crypto.randomBytes(16);
+  const iv = crypto.randomBytes(16); // 16-byte IV
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
   return { encrypted, iv: iv.toString("base64") };
