@@ -180,7 +180,7 @@ export default function Home() {
             </ul>
           ) : (
             <p className="font-mono text-black opacity-70">
-              // No files uploaded yet...
+              No files uploaded yet...
             </p>
           )}
         </section>

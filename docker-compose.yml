@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   mongo:
     image: mongo:latest
@@ -8,12 +10,24 @@ services:
 
   ssh-server:
     build:
-      context: .
-      dockerfile: dockerfile
+      context: ./ssh-server
+      dockerfile: Dockerfile
     container_name: ssh-server
     ports:
-      - "22:2222" # change if your app uses a different port
+      - "2222:22"
+    restart: unless-stopped
+    depends_on:
+      - mongo
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: file-storage-app
+    ports:
+      - "3000:3000" # Change if your app uses a different port
+    restart: unless-stopped
     depends_on:
       - mongo
     environment:
-      - MONGO_URL=mongodb://mongo:27017 # for your app to connect to mongo
+      - MONGO_URL=mongodb://mongo:27017
