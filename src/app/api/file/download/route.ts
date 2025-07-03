@@ -23,10 +23,10 @@ export async function GET(request: Request) {
     if (!auth) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-    
+
     const token = auth.split(" ")[1];
     let decoded: JwtPayload & { userId: string };
-    
+
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload & {
         userId: string;
@@ -59,14 +59,19 @@ export async function GET(request: Request) {
     if (!containerPath) {
       // Legacy file - construct path from storedName
       containerPath = `/home/sftpuser/uploads/${fileDoc.storedName}`;
-      console.log(`Legacy file detected, using constructed path: ${containerPath}`);
-      
+      console.log(
+        `Legacy file detected, using constructed path: ${containerPath}`
+      );
+
       // Optionally update the database record for future use
       try {
         await File.findByIdAndUpdate(id, { containerPath });
         console.log(`Updated legacy file with containerPath: ${id}`);
       } catch (updateError) {
-        console.warn(`Failed to update legacy file with containerPath:`, updateError);
+        console.warn(
+          `Failed to update legacy file with containerPath:`,
+          updateError
+        );
         // Continue anyway - this is just an optimization
       }
     }
@@ -81,8 +86,10 @@ export async function GET(request: Request) {
     const tempFileName = `temp-${Date.now()}-${fileDoc.storedName}`;
     tempFilePath = path.join(tempDir, tempFileName);
 
-    console.log(`Downloading file from container: ${containerPath} -> ${tempFilePath}`);
-    
+    console.log(
+      `Downloading file from container: ${containerPath} -> ${tempFilePath}`
+    );
+
     // Download file from container via SFTP
     await downloadFileFromContainer(containerPath, tempFilePath);
 
@@ -114,13 +121,11 @@ export async function GET(request: Request) {
         "Content-Type": "application/octet-stream",
         "Content-Disposition": `attachment; filename="${fileDoc.originalName}"`,
         "Content-Length": decrypted.length.toString(),
-        // Add cache headers if needed
         "Cache-Control": "private, no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
+        Pragma: "no-cache",
+        Expires: "0",
       },
     });
-
   } catch (error) {
     console.error("File download error:", error);
 
@@ -136,7 +141,10 @@ export async function GET(request: Request) {
 
     // Determine appropriate error response
     if (error instanceof Error) {
-      if (error.message.includes("SFTP") || error.message.includes("container")) {
+      if (
+        error.message.includes("SFTP") ||
+        error.message.includes("container")
+      ) {
         return NextResponse.json(
           { message: "Failed to access secure storage", error: error.message },
           { status: 503 } // Service Unavailable
@@ -150,7 +158,10 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(
-      { message: "File download failed", error: error instanceof Error ? error.message : "Unknown error" },
+      {
+        message: "File download failed",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
