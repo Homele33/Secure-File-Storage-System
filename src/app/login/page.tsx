@@ -12,19 +12,33 @@ export default function Login() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      login(data.token); // ← use context
-    } else {
-      alert("Login failed");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        console.error("Failed to parse response JSON:", jsonErr);
+        alert("Unexpected server error.");
+        return;
+      }
+
+      if (res.ok) {
+        login(data.token);
+      } else {
+        alert(data?.message || "Login failed");
+      }
+    } catch (err) {
+      console.error("Network or server error:", err);
+      alert("Unable to reach server.");
     }
   }
-
   return (
     <Layout>
       <div className="text-center mb-6">

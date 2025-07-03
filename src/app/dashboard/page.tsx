@@ -12,7 +12,7 @@ type StoredFile = {
 export default function Home() {
   const [files, setFiles] = useState<StoredFile[]>([]);
   const [file, setFile] = useState<File | null>(null);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -22,11 +22,17 @@ export default function Home() {
   }, [token]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Only redirect if not loading and not authenticated
+    if (!isLoading && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
 
+  const logout = () => {
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
+  
   // while checking auth, you can show nothing or a spinner
   if (!isAuthenticated) {
     return null;
@@ -180,7 +186,7 @@ export default function Home() {
             </ul>
           ) : (
             <p className="font-mono text-black opacity-70">
-              // No files uploaded yet...
+              No files uploaded yet...
             </p>
           )}
         </section>

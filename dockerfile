@@ -1,40 +1,20 @@
-# Use Ubuntu as base image
-FROM ubuntu:22.04
+# Use Node.js base image
+FROM node:18
 
-# Avoid prompts from apt
-ENV DEBIAN_FRONTEND=noninteractive
+# Set working directory inside the container
+WORKDIR /app
 
-# Install OpenSSH server and other utilities
-RUN apt-get update && \
-    apt-get install -y \
-        openssh-server \
-        sudo \
-        curl \
-        wget \
-        nano \
-        vim \
-        && rm -rf /var/lib/apt/lists/*
+# Copy package.json and package-lock.json (if exists)
+COPY package*.json ./
 
-# Create the SSH directory
-RUN mkdir /var/run/sshd
+# Install dependencies
+RUN npm install
 
-# Create a user for SSH access
-RUN useradd -rm -d /home/sftpuser -s /bin/bash -g root -G sudo -u 1001 sftpuser
+# Copy the rest of your app
+COPY . .
 
-# Set password for the user (change 'password' to your preferred password)
-RUN echo 'sftpuser:password' | chpasswd
+# Expose app port (e.g. 3000)
+EXPOSE 3000
 
-# Configure SSH
-RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
-RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
-RUN sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
-
-# Create directories for file transfers
-RUN mkdir -p /home/sftpuser/uploads /home/sftpuser/downloads
-RUN chown -R sftpuser:root /home/sftpuser
-
-# Expose SSH port
-EXPOSE 22
-
-# Start SSH daemon
-CMD ["/usr/sbin/sshd", "-D"]
+# Run your app
+CMD ["npm", "run", "dev"]

@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+
+  ssh-server:
+    build:
+      context: ./ssh-server
+      dockerfile: Dockerfile
+    container_name: ssh-server
+    ports:
+      - "2222:22"
+    restart: unless-stopped
+    depends_on:
+      - mongo
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: file-storage-app
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - ssh-server
