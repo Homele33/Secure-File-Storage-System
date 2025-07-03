@@ -165,19 +165,9 @@ This spins up:
 ---
 
 ## 🖼️ Screenshots
+<img src="docs/login.png" alt="login" width="400" hight="400"/>
 
-> *(Add PNGs under `docs/` if you want them rendered below)*
-
-```
-docs/
-├── login.png
-└── dashboard.png
-
-```
-
-
-![Login](docs/login.png)
-![Dashboard](docs/dashboard.png)
+<img src="docs/dashboard.png" alt="dashboard" width="400" hight="400"/>
 
 
 
