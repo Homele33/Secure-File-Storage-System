@@ -1,0 +1,19 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+
+  ssh-server:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: ssh-server
+    ports:
+      - "22:2222" # change if your app uses a different port
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017 # for your app to connect to mongo
