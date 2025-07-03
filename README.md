@@ -43,7 +43,20 @@ Built with love and security in mind by **Eden Cohen** & **Lior Engel** 💙
 | Git            | Any              |
 
 ---
-
+🏗️ Architecture
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Next.js App   │    │   MongoDB       │    │  SSH Container  │
+│   (Frontend +   │◄──►│   (Metadata)    │    │  (File Storage) │
+│    API Routes)  │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       ▲
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │           SFTP/SSH
+                          File Encryption
+                         (AES-256-CBC)
+```
 ## 📦 Setup & Run (Dockerized)
 
 ### 1. Clone the Project
@@ -66,6 +79,16 @@ SFTP_HOST=ssh-server
 SFTP_PORT=22
 SFTP_USERNAME=sftpuser
 SFTP_PASSWORD=password
+```
+####  Generate Secure Keys
+**For JWT_SECRET:**
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+**For ENCRYPTION_KEY:**
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ---
@@ -92,16 +115,24 @@ This spins up:
 ## 📁 Project Structure
 
 ```
-Secure-File-Storage-System/
-├── app/                # Next.js App Router
-│   └── api/            # API endpoints
-├── context/            # AuthContext (client state)
-├── lib/                # DB, encryption, SFTP logic
-├── models/             # Mongoose schemas
-├── ssh-server/         # SSH/SFTP container setup
-├── Dockerfile          # App container
-├── docker-compose.yml  # Compose config for all services
-├── .env.docker         # Docker-specific environment variables
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── api/               # API routes
+│   │   │   ├── auth/          # Authentication endpoints
+│   │   │   └── file/          # File management endpoints
+│   │   ├── dashboard/         # Dashboard page
+│   │   ├── login/            # Login page
+│   │   └── register/         # Registration page
+│   ├── components/            # Reusable components
+│   ├── context/              # React context providers
+│   ├── lib/                  # Utility libraries
+│   │   ├── crypto.ts         # Encryption utilities
+│   │   ├── db.ts            # Database connection
+│   │   └── sftp.ts          # SFTP operations
+│   └── models/               # Database models
+├── ssh-server/               # SSH container configuration
+├── docker-compose.yml        # Docker services definition
+└── dockerfile               # Application container
 ```
 
 ---
