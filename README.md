@@ -171,14 +171,14 @@ This spins up:
 ```
 docs/
 ├── login.png
-├── dashboard.png
-└── upload.png
+└── dashboard.png
+
 ```
 
 ```md
 ![Login](docs/login.png)
 ![Dashboard](docs/dashboard.png)
-![Upload](docs/upload.png)
+
 ```
 
 ---
