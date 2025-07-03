@@ -29,5 +29,3 @@ services:
     restart: unless-stopped
     depends_on:
       - mongo
-    environment:
-      - MONGO_URL=mongodb://mongo:27017

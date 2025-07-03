@@ -5,7 +5,11 @@ import jwt from "jsonwebtoken";
 import { NextResponse, NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
-  if (req.method !== "POST") return NextResponse.json({ status: 405 });
+  if (req.method !== "POST")
+    return NextResponse.json(
+      { message: "Method Not Allowed" },
+      { status: 405 }
+    );
 
   const body = await req.json();
   const { email, password } = body;
