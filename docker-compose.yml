@@ -25,7 +25,9 @@ services:
       dockerfile: Dockerfile
     container_name: file-storage-app
     ports:
-      - "3000:3000" # Change if your app uses a different port
+      - "3000:3000"
     restart: unless-stopped
     depends_on:
       - mongo
+      - ssh-server # ← also wait for SSH
+
