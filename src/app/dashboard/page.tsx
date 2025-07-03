@@ -32,7 +32,7 @@ export default function Home() {
     localStorage.removeItem("token");
     router.push("/login");
   };
-  
+
   // while checking auth, you can show nothing or a spinner
   if (!isAuthenticated) {
     return null;

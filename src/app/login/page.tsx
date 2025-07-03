@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext"; // ← import
 import Layout from "@/components/Layout";
@@ -7,8 +7,15 @@ import Layout from "@/components/Layout";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth(); // ← grab login()
+  const { login, isAuthenticated, isLoading } = useAuth(); // ← grab login()
   const router = useRouter();
+
+  useEffect(() => {
+    // Only redirect if not loading and authenticated
+    if (!isLoading && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
