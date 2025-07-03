@@ -175,11 +175,11 @@ docs/
 
 ```
 
-```md
+
 ![Login](docs/login.png)
 ![Dashboard](docs/dashboard.png)
 
-```
+
 
 ---
 
