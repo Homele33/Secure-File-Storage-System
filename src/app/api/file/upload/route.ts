@@ -5,6 +5,7 @@ import { connectToDB } from "@/lib/db";
 import File from "@/models/File";
 import { encryptBuffer } from "@/lib/crypto";
 import { uploadBufferToContainer, deleteFileFromContainer } from "@/lib/sftp";
+import crypto from "crypto";
 
 export const config = {
   api: {
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
 
     // 5) Generate file names and paths
     const originalName = (fileField as File).name || "unnamed";
-    const storedName = `${Date.now()}-${originalName}`;
+    const storedName = crypto.createHash("sha256").update(`${Date.now()}-${originalName}`).digest("hex");
     containerPath = `/home/sftpuser/uploads/${storedName}`;
 
     // 6) Upload encrypted buffer directly to container via SFTP
