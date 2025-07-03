@@ -59,6 +59,7 @@ cd secure-file-storage
 
 ```env
 JWT_SECRET=your_super_secret
+ENCRYPTION_KEY=your_encryption_key
 MONGODB_URI=mongodb://mongo:27017/securefilestorage
 
 SFTP_HOST=ssh-server
