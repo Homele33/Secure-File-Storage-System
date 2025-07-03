@@ -29,5 +29,4 @@ services:
     restart: unless-stopped
     depends_on:
       - mongo
-      - ssh-server # ← also wait for SSH
-
+      - ssh-server
